@@ -1,10 +1,11 @@
-import { faBook, faMoon } from "@fortawesome/free-solid-svg-icons";
+import { faBook, faFolderPlus, faMoon } from "@fortawesome/free-solid-svg-icons";
 import BookForm from "./BookForm";
 import BookList from "./BookList";
 import Navbar from "./Navbar";
 import { useEffect, useReducer, useState } from "react";
 import { BookReducerContext, BooksContext } from "./LibraryContext";
 import { nanoid } from "nanoid";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function LibraryReducer(list, action){
     switch(action.type){
@@ -33,6 +34,8 @@ function LibraryReducer(list, action){
             return {...list, books: list.books.filter(i => i.id !== action.target), status: 'deleted'}
         case "ADD_INVALID":
             return {...list, status: 'fail'}
+        case "EDIT_INVALID":
+            return {...list, status: 'edit_fail'}
         case "RESET_STATUS":
             return {...list, status: ''}
     }
@@ -61,13 +64,16 @@ export default function BookManager(){
             setAlert({info: 'Duplikasi Data' ,type: 'error'})
         }
         else if(Library.status.trim() === 'fail'){
-            setAlert({info: 'Gagal Menambahkan' ,type: 'error'})
+            setAlert({info: 'Gagal Menambahkan, Data tidak Valid' ,type: 'error'})
         }
         else if(Library.status.trim() === 'deleted'){
             setAlert({info: 'Berhasil Menghapus' ,type: 'success'})
         }
         else if(Library.status.trim() === 'edited'){
             setAlert({info: 'Berhasil Memperbarui' ,type: 'success'})
+        }
+        else if(Library.status.trim() === 'edit_fail'){
+            setAlert({info: 'Gagal Memperbarui' ,type: 'error'})
         }
         if(Library.status){
             dispatch({
@@ -94,10 +100,10 @@ export default function BookManager(){
                         <BookForm visibility={trigger} sendClose={handleSendClose}/>
                     </div>
                     <div className={`Booklist flex flex-col gap-3 min-h-screen p-3`}>
-                        <button onClick={()=> setTrigger(true)} className={`btn w-fit self-end ${Library.books.length > 0 ? '' : 'hidden'} btn-primary`}>Tambah Buku</button>
+                        <button onClick={()=> setTrigger(true)} className={`btn w-fit self-end ${Library.books.length > 0 ? '' : 'hidden'} btn-primary`}><FontAwesomeIcon icon={faFolderPlus}/> Tambah Buku</button>
                         <div className="collection flex flex-col">
                             <BookList/>
-                            <button onClick={()=> setTrigger(true)} className={`btn w-fit self-end ${Library.books.length > 0 ? 'hidden' : ''} btn-primary`}>Tambah Buku Sekarang!</button>
+                            <button onClick={()=> setTrigger(true)} className={`btn w-fit self-end ${Library.books.length > 0 ? 'hidden' : ''} btn-primary`}><FontAwesomeIcon icon={faFolderPlus}/> Tambah Buku Sekarang!</button>
                         </div>
                     </div>
                     </div>

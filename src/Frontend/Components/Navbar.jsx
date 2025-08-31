@@ -19,12 +19,12 @@ export default function Navbar({title, logo, pages= [], logoButton}){
         })
     }
     return(
-        <nav className={`flex text-white p-4 justify-evenly items-center ${change ? change.navColor : 'bg-neutral'}`}>
+        <nav className={`flex text-white p-4 justify-evenly max-sm:justify-between items-center ${change ? change.navColor : 'bg-neutral'}`}>
             <div className="left flex items-center gap-3">
                 <FontAwesomeIcon icon={logo}/>
                 <p className="font-bold">{title}</p>
             </div>
-            <ul className="right flex items-center gap-3">
+            <ul className="right flex items-center gap-6 max-sm:gap-3">
                 {pages.map((i, idx) => (
                     <li key={idx}>{i}</li>
                 ))}

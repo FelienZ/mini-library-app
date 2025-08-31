@@ -23,7 +23,7 @@ export default function BookList(){
     function sendEdit(id){
         if(newBook.title.trim() === '' || isNaN(newBook.year)|| newBook.year <= 0 || newBook.year > 2025 || newBook.genre.trim()===''){
             dispatch({
-                type: 'ADD_INVALID'
+                type: 'EDIT_INVALID'
             })
             setEdit(null)
             return
@@ -40,14 +40,14 @@ export default function BookList(){
         <section className={`flex flex-col gap-3 w-full h-screen items-center ${book.length ? '' : 'justify-center'} p-3`}>
             <p className="font-bold text-xl">Books Queue</p>
             {book.length ? (
-            <div className={`${book.length ? 'grid' : ''} lg:grid-cols-4 gap-4 sm:grid-cols-2 border w-full h-full overflow-y-auto p-4 border-neutral-300 rounded-sm ${book.length ? '' : 'place-content-center'}`}>
+            <div className={`${book.length ? 'grid' : ''} lg:grid-cols-4 gap-4 sm:grid-cols-2 w-full h-full overflow-y-auto p-4 rounded-sm ${book.length ? '' : 'place-content-center'}`}>
                     {book.map(i => (
-                        <div key={i.id} className="flex flex-col gap-2 h-80 justify-between border border-gray-300 p-3 rounded-sm">
+                        <div key={i.id} className="flex flex-col gap-2 h-80 justify-between border border-gray-300 p-3 rounded-md">
                             {edit === i.id ? (
                                 <input onChange={(e)=>setNewBook({...newBook, title: e.target.value})} defaultValue={i.title} type="text" className="input bg-transparent border border-neutral-600 w-full" placeholder="Masukkan Judul Baru"/>
                             ) : (<span className="font-bold flex items-center gap-2">Judul : <p className="font-normal">{i.title}</p></span>)}
                             {edit === i.id ? (
-                                <select name="genre" onChange={(e)=> setNewBook({...newBook, genre: e.target.value})} defaultValue={i.genre} className="select bg-white border border-gray-400 w-full">
+                                <select name="genre" onChange={(e)=> setNewBook({...newBook, genre: e.target.value})} defaultValue={i.genre} className="select bg-transparent border border-gray-400 w-full">
                                     <option value="" disabled hidden>Pilih Kategori</option>
                                     <option value="Romance">Romantis</option>
                                     <option value="Horror">Horror</option>
