@@ -14,14 +14,30 @@ export default function BookList(){
         description: ''
     }
     const [newBook, setNewBook] = useState(newData)
-    function sendDelete(id){
+    async function sendDelete(id){
+        await fetch(`http://localhost:3000/api/books/${id}`, {
+            method: 'DELETE'
+        })
         dispatch({
             type: 'DELETE_BOOK',
             target: id
         })
     }
-    function sendEdit(id){
+    async function sendEdit(id){
         if(newBook.title.trim() === '' || isNaN(newBook.year)|| newBook.year <= 0 || newBook.year > 2025 || newBook.genre.trim()===''){
+            dispatch({
+                type: 'EDIT_INVALID'
+            })
+            setEdit(null)
+            return
+        }
+        const response = await fetch(`http://localhost:3000/api/books/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type' : 'application/json'},
+            body: JSON.stringify(newBook)
+        })
+        const data = await response.json()
+        if(data.status !== 'success'){
             dispatch({
                 type: 'EDIT_INVALID'
             })
@@ -30,7 +46,7 @@ export default function BookList(){
         }
         dispatch({
             type: 'EDIT_BOOK',
-            payload: newBook,
+            payload: data.payload,
             target: id
         })
         setEdit(null)
@@ -40,7 +56,7 @@ export default function BookList(){
         <section className={`flex flex-col gap-3 w-full h-screen items-center ${book.length ? '' : 'justify-center'} p-3`}>
             <p className="font-bold text-xl">Books Queue</p>
             {book.length ? (
-            <div className={`${book.length ? 'grid' : ''} lg:grid-cols-4 gap-4 sm:grid-cols-2 w-full h-full overflow-y-auto p-4 rounded-sm ${book.length ? '' : 'place-content-center'}`}>
+            <div className={`${book.length ? 'grid' : ''} lg:grid-cols-3 gap-4 sm:grid-cols-2 w-full h-full overflow-y-auto p-4 rounded-sm ${book.length ? '' : 'place-content-center'}`}>
                     {book.map(i => (
                         <div key={i.id} className="flex flex-col gap-2 h-80 justify-between border border-gray-300 p-3 rounded-md">
                             {edit === i.id ? (
@@ -49,9 +65,9 @@ export default function BookList(){
                             {edit === i.id ? (
                                 <select name="genre" onChange={(e)=> setNewBook({...newBook, genre: e.target.value})} defaultValue={i.genre} className="select bg-transparent border border-gray-400 w-full">
                                     <option value="" disabled hidden>Pilih Kategori</option>
-                                    <option value="Romance">Romantis</option>
-                                    <option value="Horror">Horror</option>
-                                    <option value="Comedy">Komedi</option>
+                                    <option className="text-neutral" value="Romance">Romantis</option>
+                                    <option className="text-neutral" value="Horror">Horror</option>
+                                    <option className="text-neutral" value="Comedy">Komedi</option>
                                 </select>
                             ) : (<span className="font-bold flex items-center gap-2">Genre : <p className="font-normal">{i.genre}</p></span>)}
                             {edit === i.id ? (

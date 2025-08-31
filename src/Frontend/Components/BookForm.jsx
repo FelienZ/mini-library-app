@@ -12,7 +12,7 @@ export default function BookForm({visibility, sendClose}){
     const [Book, setBook] = useState(newData)
     // const [visible, setVisible] = useState(visibility)
     // console.log('cek child: ', visibility)
-    function handleSend(e){
+    async function handleSend(e){
         e.preventDefault();
         if(Book.title.trim() === '' || Book.genre.trim() === '' || isNaN(Book.year) || Number(Book.year) <= 0 || Number(Book.year) > 2025){
             dispatch({
@@ -21,9 +21,21 @@ export default function BookForm({visibility, sendClose}){
             handleClose()
             return
         }
+        const response = await fetch('http://localhost:3000/api/books', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(Book)
+        })
+        const data = await response.json()
+        if(data.status !== 'success'){
+            dispatch({
+                type: 'ADD_INVALID'
+            })
+            return
+        }
         dispatch({
             type: 'ADD_BOOK',
-            payload: Book
+            payload: data.payload
         })
         handleClose()
         setBook({title: '', year: '', genre: '', description: ''})
@@ -46,7 +58,7 @@ export default function BookForm({visibility, sendClose}){
                         <option value="Comedy">Komedi</option>
                     </select>
                     <label htmlFor="year" className="text-sm">Tahun Buku: </label>
-                    <input name="year" value={Book.year} onChange={(e)=> setBook({...Book, year: Number(e.target.value)})} type="text" className="input bg-transparent border border-gray-400 w-full" placeholder="Masukkan Tahun Terbit Buku"/>
+                    <input name="year" value={Book.year} onChange={(e)=> setBook({...Book, year: Number(e.target.value)})} type="number" className="input bg-transparent border border-gray-400 w-full" placeholder="Masukkan Tahun Terbit Buku"/>
                     <label htmlFor="description" className="text-sm">Sinopsis: </label>
                     <textarea name="description" value={Book.description} onChange={(e)=> setBook({...Book, description: e.target.value})} type="text" className="textarea resize-none bg-transparent border border-gray-400 w-full" placeholder="Sinopsis Singkat Buku"/>
                 </div>

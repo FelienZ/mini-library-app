@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "nodemon src/backend/server.cjs",
+    "migrate": "node-pg-migrate"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.0.0",
@@ -16,7 +18,9 @@
     "@fortawesome/free-solid-svg-icons": "^7.0.0",
     "@fortawesome/react-fontawesome": "^3.0.1",
     "@tailwindcss/vite": "^4.1.12",
+    "cors": "^2.8.5",
     "daisyui": "^5.0.54",
+    "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "nanoid": "^5.1.5",
     "node-pg-migrate": "^8.0.3",

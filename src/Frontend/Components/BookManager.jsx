@@ -4,11 +4,12 @@ import BookList from "./BookList";
 import Navbar from "./Navbar";
 import { useEffect, useReducer, useState } from "react";
 import { BookReducerContext, BooksContext } from "./LibraryContext";
-import { nanoid } from "nanoid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function LibraryReducer(list, action){
     switch(action.type){
+        case "FETCH_DATA": 
+            return {...list, books: action.payload}
         case "SET_THEME":
             return {...list, theme: action.payload};
         case "ADD_BOOK":
@@ -16,7 +17,7 @@ function LibraryReducer(list, action){
                 if(checkData){
                     return {...list, status: 'duplicated'}
                 }
-                return {...list, books: [...list.books, {...action.payload, id: nanoid(10)}], status: 'success'}
+                return {...list, books: [...list.books, {...action.payload}], status: 'success'}
             }
         case "EDIT_BOOK":
             {const checkData = list.books.some(i => i.title.trim().toLowerCase() === action.payload.title.trim().toLowerCase() && i.id !== action.target)
@@ -56,6 +57,18 @@ export default function BookManager(){
             setMessage(null)
         }, 1400);
     }
+    useEffect(()=> {
+        async function FetchData(){
+           const response = await fetch('http://localhost:3000/api/books')
+           const data = await response.json()
+
+           dispatch({
+            type: 'FETCH_DATA',
+            payload: data
+           })
+        }
+        FetchData()
+    }, [])
     useEffect(()=> {
         if(Library.status.trim() === 'success'){
             setAlert({info: 'Berhasil Menambahkan' ,type: 'success'})
