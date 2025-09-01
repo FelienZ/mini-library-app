@@ -27,6 +27,7 @@ export default function BookForm({visibility, sendClose}){
             body: JSON.stringify(Book)
         })
         const data = await response.json()
+        console.log(data)
         if(data.status !== 'success'){
             dispatch({
                 type: 'ADD_INVALID'

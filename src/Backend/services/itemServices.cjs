@@ -1,15 +1,14 @@
 const fs = require('fs/promises');
-const path = require('path')
-
-const filePath = path.join(__dirname, "../data/Book.json")
+const path = require('path');
+const { Pool } = require('pg');
+const pool = new Pool()
 
 async function getItems() {
-    const data = JSON.parse(await fs.readFile(filePath, 'utf-8'))
-    return data;
+    const result = await pool.query('SELECT * FROM books ORDER BY title')
+    return result.rows;
 }
 
 async function postItems({id, title, genre, year, description}) {
-    const data = JSON.parse(await fs.readFile(filePath, 'utf-8'))
     const newData = {
         id, title, genre, year, description
     }
@@ -17,18 +16,24 @@ async function postItems({id, title, genre, year, description}) {
         console.log('Data Tidak Valid')
         return {payload: newData, status: 'fail', message: 'Data Tidak Valid'}
     }
-    const checkData = data.some(i => i.title.trim().toLowerCase() === title.trim().toLowerCase());
-    if(checkData){
+    const checkQuery = {
+        text: 'SELECT title FROM books WHERE LOWER(title)=LOWER($1)',
+        values: [title.trim()]
+    }
+    const checkResult = await pool.query(checkQuery);
+    if(checkResult.rowCount > 0){
         console.log('Duplikasi Judul')
         return {payload: newData, status: 'duplicated', message: 'Duplikasi Judul'}
     }
-    data.push(newData);
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2))
-    return {payload: newData, status: 'success', message: 'Berhasil Menambahkan'}
+    const query = {
+        text: 'INSERT INTO books (id, title, genre, year, description) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        values: [id, title, genre, year, description]
+    }
+    const result = await pool.query(query)
+    return {payload: result.rows[0], status: 'success', message: 'Berhasil Menambahkan'}
 }
 
 async function putItems({ id, title, genre, year, description }) {
-    const data = JSON.parse(await fs.readFile(filePath, 'utf-8'))
     const newData = {
         id, title, genre, year, description
     }
@@ -36,25 +41,28 @@ async function putItems({ id, title, genre, year, description }) {
         console.log('Data Tidak Valid')
         return {payload: newData, status: 'fail', message: 'Data Tidak Valid'}
     }
-    const checkData = data.some(i => i.title.trim().toLowerCase() === title.trim().toLowerCase() && i.id !== id);
-    if(checkData){
+    const checkQuery = {
+        text: 'SELECT title FROM books WHERE LOWER(title)=LOWER($1) AND id!=$2',
+        values: [title.trim(), id]
+    }
+    const checkResult = await pool.query(checkQuery);
+    if(checkResult.rowCount > 0){
         console.log('Duplikasi Judul')
         return {payload: newData, status: 'duplicated', message: 'Duplikasi Judul'}
     }
-    const mapData = data.map(i => {
-        if(i.id === id){
-            return {...newData}
-        }
-        return i
-    })
-    await fs.writeFile(filePath, JSON.stringify(mapData, null, 2))
-    return {payload: newData, status: 'success', message: 'Berhasil Memperbarui'}
+    const updateQuery = {
+        text: 'UPDATE books SET title=$1, genre=$2, year=$3, description=$4 WHERE id=$5 RETURNING *',
+        values: [title, genre, year, description, id]
+    }
+    const result = await pool.query(updateQuery);
+    return {payload: result.rows[0], status: 'success', message: 'Berhasil Memperbarui'}
 }
 
 async function deleteItems(id) {
-    const data = JSON.parse(await fs.readFile(filePath, 'utf-8'))
-    const filterData = data.filter(i => i.id !== id)
-    await fs.writeFile(filePath, JSON.stringify(filterData, null, 2))
+    await pool.query({
+        text: 'DELETE FROM books WHERE id=$1',
+        values: [id]
+    })
 }
 
 module.exports = {
